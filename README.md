@@ -35,6 +35,7 @@ Memory is manually freed when items or the table are deleted.
 └── main.c            # Example usage
 
 ----------------Example Usage----------------
+```
 #include "hash_table.h"
 #include <stdio.h>
 
@@ -50,7 +51,7 @@ int main(void) {
     ht_del_hash_table(ht);
     return 0;
 }
-
+```
 
 Output:
 
