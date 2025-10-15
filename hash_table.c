@@ -20,9 +20,36 @@
 void ht_insert(ht_hash_table* ht, const char* key, const char* value);
 char* ht_search(ht_hash_table* ht, const char* key);
 void ht_delete(ht_hash_table* h, const char* key);
-
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
+static ht_item* ht_new_item(const char* k, const char* v);
+int isPrime(int x);
+int nextPrime(int x);
+static ht_hash_table* ht_new_sized(const int base_size);
+ht_hash_table* ht_new();
+// these two methods below will be handled the freeing of data
+static void ht_del_item(ht_item* i);
+void ht_del_hash_table(ht_hash_table* ht);
+static void ht_resize(ht_hash_table* ht, const int base_size);
+static void ht_resize_up(ht_hash_table* ht);
+static void ht_resize_down(ht_hash_table* ht);
+static int ht_hashing(const char* s, const int a, const int numBuckets);
+static int ht_get_hash(const char* s, const int numBuckets , const int attempt);
 
+
+int main(void) {
+    //initialise then delete table
+    ht_hash_table* ht = ht_new();
+    ht_insert(ht, "name1", "Tom");
+    ht_insert(ht, "name2", "Bob");
+    ht_insert(ht, "name3", "Muhammad");
+    ht_delete(ht, "name2");
+    printf("name1 is: %s\n", ht_search(ht, "name1"));
+    if (ht_search(ht, "name2") == NULL) {
+        printf("name2 not found\n");
+    }
+    printf("name 3 is: %s\n", ht_search(ht, "name3"));
+    ht_del_hash_table(ht);
+}
 // k -> key, v -> value
 static ht_item* ht_new_item(const char* k, const char* v) {
     // let i be a pointer
@@ -76,33 +103,6 @@ ht_hash_table* ht_new() {
     return ht_new_sized(HT_INITIAL_BASE_SIZE);
 };
 
-
-
-// these two methods below will be handled the freeing of data
-static void ht_del_item(ht_item* i);
-void ht_del_hash_table(ht_hash_table* ht);
-static void ht_resize(ht_hash_table* ht, const int base_size);
-static void ht_resize_up(ht_hash_table* ht);
-static void ht_resize_down(ht_hash_table* ht);
-static int ht_hashing(const char* s, const int a, const int numBuckets);
-static int ht_get_hash(const char* s, const int numBuckets , const int attempt);
-
-
-int main(void) {
-    //initialise then delete table
-    ht_hash_table* ht = ht_new();
-    ht_insert(ht, "name1", "Tom");
-    ht_insert(ht, "name2", "Bob");
-    ht_insert(ht, "name3", "Muhammad");
-    ht_delete(ht, "name2");
-    printf("name1 is: %s\n", ht_search(ht, "name1"));
-    if (ht_search(ht, "name2") == NULL) {
-        printf("name2 not found\n");
-    }
-    printf("name 3 is: %s\n", ht_search(ht, "name3"));
-    ht_del_hash_table(ht);
-}
-
 static void ht_del_item(ht_item* i) {
     // remove key, value and pointer from memory
     free(i->key);
@@ -137,7 +137,6 @@ static void ht_resize(ht_hash_table* ht, const int base_size) {
 
     ht->size = new_ht->size;
     ht->count = new_ht->count;
-
     // To delete new_ht, we give it ht's size and items
     const int tmp_size = ht->size;
     ht->size = new_ht->size;
@@ -166,11 +165,9 @@ static void ht_resize_down(ht_hash_table* ht) {
 static int ht_hashing(const char* s, const int a, const int numBuckets) {
     long hash = 0;
     const int stringLength = strlen(s);
-
     for (int i = 0; i < stringLength; i++) {
         hash = (hash * a + s[i]) % numBuckets;
     }
-
     return (int)hash;
 }
 
@@ -214,14 +211,12 @@ char* ht_search(ht_hash_table* ht, const char* key) {
     int index = ht_get_hash(key, ht->size, 0);
     ht_item* item = ht->items[index];
     int i = 1;
-
     while (item != NULL) {
         if (item != &HT_DELETED_ITEM) {
             if (strcmp(item->key, key) == 0) {
                 return item->value;
             }
         }
-
         index = ht_get_hash(key, ht->size, i);
         item = ht->items[index];
         i++;
@@ -231,9 +226,7 @@ char* ht_search(ht_hash_table* ht, const char* key) {
 
 void ht_delete(ht_hash_table* ht, const char* key) {
     const int load = ht->count * 100 / ht->size;
-    if (load < 10) {
-        ht_resize_down(ht);
-    }
+    if (load < 10) {ht_resize_down(ht);}
     int index = ht_get_hash(key, ht->size, 0);
     ht_item* item = ht->items[index];
     int i = 1;
