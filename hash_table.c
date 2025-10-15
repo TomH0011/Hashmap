@@ -60,7 +60,6 @@ static ht_item* ht_new_item(const char* k, const char* v) {
 };
 
 // is x a prime number
-
 int isPrime(int x) {
     if (x < 2) return -1;
     else if (x < 4) return 1;
@@ -70,7 +69,6 @@ int isPrime(int x) {
     }
     return 1;
 }
-
 
 int nextPrime(int x) {
     while (isPrime(x) != 1) {
