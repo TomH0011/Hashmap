@@ -79,6 +79,30 @@ ht_hash_table* ht_new() {
 
 
 // these two methods below will be handled the freeing of data
+static void ht_del_item(ht_item* i);
+void ht_del_hash_table(ht_hash_table* ht);
+static void ht_resize(ht_hash_table* ht, const int base_size);
+static void ht_resize_up(ht_hash_table* ht);
+static void ht_resize_down(ht_hash_table* ht);
+static int ht_hashing(const char* s, const int a, const int numBuckets);
+static int ht_get_hash(const char* s, const int numBuckets , const int attempt);
+
+
+int main(void) {
+    //initialise then delete table
+    ht_hash_table* ht = ht_new();
+    ht_insert(ht, "name1", "Tom");
+    ht_insert(ht, "name2", "Bob");
+    ht_insert(ht, "name3", "Muhammad");
+    ht_delete(ht, "name2");
+    printf("name1 is: %s\n", ht_search(ht, "name1"));
+    if (ht_search(ht, "name2") == NULL) {
+        printf("name2 not found\n");
+    }
+    printf("name 3 is: %s\n", ht_search(ht, "name3"));
+    ht_del_hash_table(ht);
+}
+
 static void ht_del_item(ht_item* i) {
     // remove key, value and pointer from memory
     free(i->key);
@@ -126,18 +150,15 @@ static void ht_resize(ht_hash_table* ht, const int base_size) {
     ht_del_hash_table(new_ht);
 }
 
-
 static void ht_resize_up(ht_hash_table* ht) {
     const int new_size = ht->size * 2;
     ht_resize(ht, new_size);
 }
 
-
 static void ht_resize_down(ht_hash_table* ht) {
     const int new_size = ht->size / 2;
     ht_resize(ht, new_size);
 }
-
 
 // note this method requires user to pick an 'a'
 // due to human error humans are more likely to pick one 'a' over another
@@ -162,23 +183,6 @@ static int ht_get_hash(
 
     return (hash_a + (attempt * (hash_b + 1))) % numBuckets;
 }
-
-
-int main(void) {
-    //initialise then delete table
-    ht_hash_table* ht = ht_new();
-    ht_insert(ht, "name1", "Tom");
-    ht_insert(ht, "name2", "Bob");
-    ht_insert(ht, "name3", "Muhammad");
-    ht_delete(ht, "name2");
-    printf("name1 is: %s\n", ht_search(ht, "name1"));
-    if (ht_search(ht, "name2") == NULL) {
-        printf("name2 not found\n");
-    }
-    printf("name 3 is: %s\n", ht_search(ht, "name3"));
-    ht_del_hash_table(ht);
-}
-
 
 void ht_insert(ht_hash_table* ht, const char* key, const char* value) {
     const int load = ht->count * 100 / ht->size;
